@@ -3,15 +3,15 @@ package product
 import (
 	"fmt"
 
-	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/abc/infrastructure"
+	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/infrastructure"
 	"gorm.io/gorm"
 )
 
-type ProductRepository struct {
+type Repository struct {
 	db *gorm.DB
 }
 
-var productRepo *ProductRepository
+var productRepo *Repository
 
 func init() {
 	db := infrastructure.NewMySqlDB("root:mysql@tcp(127.0.0.1:3306)/application?charset=utf8mb4&parseTime=True&loc=Local")
@@ -19,33 +19,39 @@ func init() {
 	productRepo.Migration()
 }
 
-// Creates user repository
-func NewRepository(db *gorm.DB) *ProductRepository {
-	return &ProductRepository{
+// NewRepository Creates user repository
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{
 		db: db,
 	}
 }
 
-// Migration
-func (r *ProductRepository) Migration() {
-	r.db.AutoMigrate(&Product{})
-}
-
-// Creates new product model and adds it to database
-func NewModel(productName string, categoryName string, price float64, stock int, sku string) {
-
-	newProduct := &Product{
-		ProductName:  productName,
-		Price:        price,
-		Stock:        stock,
-		CategoryName: categoryName,
-		SKU:          sku,
+// Migration for product table
+func (r *Repository) Migration() {
+	err := r.db.AutoMigrate(&Product{})
+	if err != nil {
+		panic(err)
 	}
-
-	productRepo.db.Create(newProduct)
 }
 
-// Finds all products in db
+// NewModel Creates new product model
+func NewModel(productName string, categoryId uint, price float64, stock int, sku string) *Product {
+
+	return &Product{
+		ProductName: productName,
+		Price:       price,
+		Stock:       stock,
+		CategoryId:  categoryId,
+		SKU:         sku,
+	}
+}
+
+// Create creates new product model in database
+func Create(product *Product) {
+	productRepo.db.Create(product)
+}
+
+// FindAll Finds all products in db
 func FindAll() []Product {
 	var products []Product
 	productRepo.db.Find(&products)
@@ -76,8 +82,8 @@ func SearchProduct(queryString string) []Product {
 	return products
 }
 
-// SearchProductByID searches products by product id and returns Product
-func SearchProductByID(id uint) Product {
+// SearchById searches products by product id and returns Product
+func SearchById(id uint) Product {
 	var product Product
 	productRepo.db.Where("id = ?", id).Find(&product)
 
@@ -108,13 +114,13 @@ func UpdateSKU(p Product, newSKU string) {
 	productRepo.db.Save(&p)
 }
 
-// UpdateCategoryID updates product category id
-func UpdateCategoryID(p Product, newCategoryName string) {
-	p.CategoryName = newCategoryName
+// UpdateCategory updates product category id
+func UpdateCategory(p Product, newCategoryId uint) {
+	p.CategoryId = newCategoryId
 	productRepo.db.Save(&p)
 }
 
-// Deletes product from db
+// DeleteProduct Deletes product from db
 func DeleteProduct(p Product) {
 	productRepo.db.Delete(&p)
 }
