@@ -1,8 +1,8 @@
 package cart
 
 type RequestBody struct {
-	ID     uint `json:"id" validate:"number,min=1"`
-	Amount int  `json:"amount" validate:"number,min=1"`
+	ID     uint `json:"id"`
+	Amount int  `json:"amount"`
 }
 
 type Product struct {

@@ -2,10 +2,12 @@ package api
 
 import (
 	cartApi "github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/api/cart"
+	categoryApi "github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/api/category"
 	orderApi "github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/api/order"
 	productApi "github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/api/product"
 	userApi "github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/api/user"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/cart"
+	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/category"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/order"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/product"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/user"
@@ -28,6 +30,9 @@ func RegisterHandlers(r *gin.Engine) {
 	productService := product.NewService()
 	productController := productApi.NewProductController(productService)
 
+	categoryService := category.NewService()
+	categoryController := categoryApi.NewCategoryController(categoryService)
+
 	userGroup := r.Group("/user")
 	userGroup.POST("/register", userController.CreateUser)
 	userGroup.POST("/login", userController.Login)
@@ -41,15 +46,18 @@ func RegisterHandlers(r *gin.Engine) {
 	orderGroup := r.Group("/order")
 	orderGroup.GET("/list", middleware.AuthForGeneral(), orderController.GetOrderList)
 	orderGroup.POST("/create", middleware.AuthForGeneral(), orderController.CreateOrder)
-	orderGroup.GET("/detail", middleware.AuthForGeneral(), orderController.GetOrderDetail)
+	orderGroup.GET("/detail", middleware.AuthForGeneral(), orderController.GetOrderDetails)
 	orderGroup.DELETE("/cancel", middleware.AuthForGeneral(), orderController.CancelOrder)
 
 	productGroup := r.Group("/product")
 	productGroup.GET("/list", productController.GetProductList)
-	productGroup.GET("/detail", productController.GetProductDetail)
 	productGroup.GET("/search", productController.SearchProduct)
 	productGroup.POST("/create", middleware.AuthForAdmin(), productController.CreateProduct)
 	productGroup.PUT("/update", middleware.AuthForAdmin(), productController.UpdateProduct)
 	productGroup.DELETE("/delete", middleware.AuthForAdmin(), productController.DeleteProduct)
+
+	categoryGroup := r.Group("/category")
+	categoryGroup.GET("/list", categoryController.GetCategoryList)
+	categoryGroup.POST("/create", middleware.AuthForAdmin(), categoryController.CreateCategory)
 
 }

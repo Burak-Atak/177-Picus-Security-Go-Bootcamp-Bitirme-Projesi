@@ -11,6 +11,7 @@ func NewService() *Service {
 	return &Service{}
 }
 
+// GetProduct checks if product exists and returns it
 func (s *Service) GetProduct(productId uint) (*Product, error) {
 
 	product := SearchById(productId)
@@ -20,6 +21,8 @@ func (s *Service) GetProduct(productId uint) (*Product, error) {
 	return product, nil
 
 }
+
+// CreateProduct checks if the product is already in the database
 func (s *Service) CreateProduct(productName string, sku string) error {
 
 	if IsProductExist(productName, sku) {
@@ -30,6 +33,7 @@ func (s *Service) CreateProduct(productName string, sku string) error {
 
 }
 
+// GetProductList returns a list of products if there are any in the database otherwise returns error
 func (s *Service) GetProductList() ([]Product, error) {
 	products := FindAll()
 
@@ -40,6 +44,7 @@ func (s *Service) GetProductList() ([]Product, error) {
 	return products, nil
 }
 
+// SearchProduct checks if product is exist in database by product name and sku
 func (s *Service) SearchProduct(search string) ([]Product, error) {
 	products := SearchProduct(search)
 

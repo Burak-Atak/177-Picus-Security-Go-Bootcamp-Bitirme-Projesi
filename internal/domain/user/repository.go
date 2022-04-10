@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/infrastructure"
+	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/pkg/database_handler"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +12,7 @@ type Repository struct {
 var repository *Repository
 
 func init() {
-	db := infrastructure.NewMySqlDB("root:mysql@tcp(127.0.0.1:3306)/application?charset=utf8mb4&parseTime=True&loc=Local")
+	db := database_handler.NewMySqlDB("root:mysql@tcp(127.0.0.1:3306)/application?charset=utf8mb4&parseTime=True&loc=Local")
 	repository = NewRepository(db)
 	repository.Migration()
 }
@@ -45,14 +45,6 @@ func Create(user *User) {
 	repository.db.Create(user)
 }
 
-// SearchById search user by id
-func SearchById(id uint) User {
-	var model User
-	repository.db.Where("id = ?", id).Find(&model)
-
-	return model
-}
-
 // IsUserExist checks if user exist
 func IsUserExist(email string) bool {
 	var model User
@@ -65,6 +57,7 @@ func IsUserExist(email string) bool {
 	return true
 }
 
+// SearchByEmail searches user by email
 func SearchByEmail(email string) User {
 	var model User
 	repository.db.Where("email = ?", email).Find(&model)

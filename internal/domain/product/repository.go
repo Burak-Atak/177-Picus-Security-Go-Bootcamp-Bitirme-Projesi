@@ -1,8 +1,9 @@
 package product
 
 import (
-	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/infrastructure"
+	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/pkg/database_handler"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type Repository struct {
@@ -12,7 +13,7 @@ type Repository struct {
 var productRepo *Repository
 
 func init() {
-	db := infrastructure.NewMySqlDB("root:mysql@tcp(127.0.0.1:3306)/application?charset=utf8mb4&parseTime=True&loc=Local")
+	db := database_handler.NewMySqlDB("root:mysql@tcp(127.0.0.1:3306)/application?charset=utf8mb4&parseTime=True&loc=Local")
 	productRepo = NewRepository(db)
 	productRepo.Migration()
 }
@@ -49,6 +50,11 @@ func Create(product *Product) {
 	productRepo.db.Create(product)
 }
 
+// Update updates product model in database
+func Update(product *Product) {
+	productRepo.db.Save(product)
+}
+
 // FindAll Finds all products in db
 func FindAll() []Product {
 	var products []Product
@@ -63,7 +69,7 @@ func IsProductExist(productName string, sku string) bool {
 
 	if len(allProducts) != 0 {
 		var product Product
-		productRepo.db.Where("product_name = ? OR sku = ?", productName, sku).Find(&product)
+		productRepo.db.Where("LOWER(product_name) = ? OR LOWER(sku) = ?", strings.ToLower(productName), strings.ToLower(sku)).Find(&product)
 		if product.ID != 0 {
 			return true
 		}
@@ -74,7 +80,7 @@ func IsProductExist(productName string, sku string) bool {
 // SearchProduct searches products by product name and sku and returns []Product
 func SearchProduct(queryString string) []Product {
 	var products []Product
-	productRepo.db.Where("product_name LIKE ?", "%"+queryString+"%").Or(productRepo.db.Where("sku LIKE ?", "%"+queryString+"%")).Find(&products)
+	productRepo.db.Where("LOWER(product_name) LIKE ?", "%"+strings.ToLower(queryString)+"%").Or(productRepo.db.Where("LOWER(sku) LIKE ?", "%"+strings.ToLower(queryString)+"%")).Find(&products)
 
 	return products
 }
@@ -111,13 +117,23 @@ func UpdateSKU(p Product, newSKU string) {
 	productRepo.db.Save(&p)
 }
 
-// UpdateCategory updates product category id
-func UpdateCategory(p Product, newCategoryName string) {
-	p.CategoryName = newCategoryName
-	productRepo.db.Save(&p)
-}
-
 // DeleteProduct Deletes product from db
 func DeleteProduct(p Product) {
 	productRepo.db.Delete(&p)
+}
+
+// SearchBySKU searches product by sku and returns Product
+func SearchBySKU(sku string) *Product {
+	var product Product
+	productRepo.db.Where("LOWER(sku) = ?", strings.ToLower(sku)).Find(&product)
+
+	return &product
+}
+
+// SearchByProductName searches products by product name and returns Product
+func SearchByProductName(productName string) *Product {
+	var product Product
+	productRepo.db.Where("LOWER(product_name) = ?", strings.ToLower(productName)).Find(&product)
+
+	return &product
 }

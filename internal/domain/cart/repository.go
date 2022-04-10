@@ -1,7 +1,7 @@
 package cart
 
 import (
-	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/infrastructure"
+	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/pkg/database_handler"
 	"gorm.io/gorm"
 )
 
@@ -12,12 +12,12 @@ type Repository struct {
 var cartRepo *Repository
 
 func init() {
-	db := infrastructure.NewMySqlDB("root:mysql@tcp(127.0.0.1:3306)/application?charset=utf8mb4&parseTime=True&loc=Local")
+	db := database_handler.NewMySqlDB("root:mysql@tcp(127.0.0.1:3306)/application?charset=utf8mb4&parseTime=True&loc=Local")
 	cartRepo = NewRepository(db)
 	cartRepo.Migration()
 }
 
-// NewCartDetailsRepository Creates cart repository
+// NewRepository Creates cart repository
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
 		db: db,
@@ -32,7 +32,7 @@ func (r *Repository) Migration() {
 	}
 }
 
-// NewCartDetailsModel Creates new cart model
+// NewModel Creates new cart model
 func NewModel(userId uint) *Cart {
 
 	return &Cart{
@@ -40,7 +40,7 @@ func NewModel(userId uint) *Cart {
 	}
 }
 
-// CreateCartDetails creates new cart model in database
+// Create creates new cart model in database
 func Create(cart *Cart) {
 	cartRepo.db.Create(cart)
 }
@@ -53,22 +53,12 @@ func SearchById(id uint) *Cart {
 	return &cart
 }
 
-// IsCartExist checks if cart exists
-func IsCartExist(userId uint) bool {
-	var cart Cart
-	cartRepo.db.Where("user_id = ?", userId).First(&cart)
-
-	if cart.ID == 0 {
-		return false
-	}
-
-	return true
-}
-
+// Update updates Cart model in database
 func Update(cart *Cart) {
 	cartRepo.db.Save(cart)
 }
 
+// UpdateUserCart updates user Cart model by given parameters
 func UpdateUserCart(userId uint, newAmount int, newPrice float64) {
 	usersCart := SearchById(userId)
 	usersCart.Amount += newAmount

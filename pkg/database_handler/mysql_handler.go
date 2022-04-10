@@ -1,4 +1,4 @@
-package infrastructure
+package database_handler
 
 import (
 	"fmt"

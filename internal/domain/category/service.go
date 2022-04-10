@@ -9,22 +9,11 @@ func NewService() *Service {
 	return &Service{}
 }
 
-func (s *Service) CreateCategory(categoryName string) (*Category, error) {
+// GetCategoryByName checks if category exists
+func (s *Service) GetCategoryByName(categoryName string) error {
 
 	if IsCategoryExist(categoryName) {
-		return nil, helpers.CategoryAlreadyExistError
+		return helpers.CategoryAlreadyExistError
 	}
-
-	category := GetCategoryByName(categoryName)
-	return category, nil
-}
-
-func (s *Service) GetCategoryByName(categoryName string) (*Category, error) {
-
-	if !IsCategoryExist(categoryName) {
-		return nil, helpers.CategoryNotFoundError
-	}
-
-	category := GetCategoryByName(categoryName)
-	return category, nil
+	return nil
 }

@@ -16,13 +16,10 @@ type ApiError struct {
 
 func DecodeBody(body interface{}, context *gin.Context) error {
 	if context.Request.Header.Get("Content-Type") != "application/json" {
-		context.AbortWithStatusJSON(http.StatusUnsupportedMediaType, gin.H{"error": UnsupportedMediaType.Error()})
-
-		return InvalidIdError
+		return UnsupportedMediaType
 	}
 
 	if err := context.ShouldBindJSON(body); err != nil {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return err
 	}
 
@@ -34,10 +31,12 @@ func DecodeBody(body interface{}, context *gin.Context) error {
 				out[i] = ApiError{fe.Field(), msgForTag(fe.Tag())}
 			}
 			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": out})
-
-			return InvalidIdError
+			context.Abort()
+			return InvalidField
 		}
+		return err
 	}
+
 	return nil
 }
 
@@ -53,6 +52,10 @@ func msgForTag(tag string) string {
 		return "This field must be at most 20 characters"
 	case "number":
 		return "This field must be a number"
+
+	case "gt":
+		return "This field must be greater than 1"
 	}
+
 	return ""
 }

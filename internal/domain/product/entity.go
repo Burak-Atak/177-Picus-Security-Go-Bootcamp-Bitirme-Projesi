@@ -8,9 +8,9 @@ import (
 type Product struct {
 	gorm.Model
 	ProductName  string            `json:"product_name" validate:"required"`
-	Price        float64           `json:"price" validate:"required, number"`
-	Stock        int               `json:"stock" validate:"required, number"`
-	CategoryName string            `json:"category_id" validate:"required"`
+	Price        float64           `json:"price" validate:"gt=1"`
+	Stock        int               `json:"stock" validate:"gt=1"`
+	CategoryName string            `json:"category_name" validate:"required"`
 	SKU          string            `json:"sku" validate:"required"`
-	Category     category.Category `gorm:"references:CategoryName; constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Category     category.Category `gorm:"foreignkey:CategoryName;references:CategoryName; constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
