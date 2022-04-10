@@ -1,8 +1,6 @@
 package product
 
 import (
-	"fmt"
-
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/infrastructure"
 	"gorm.io/gorm"
 )
@@ -35,14 +33,14 @@ func (r *Repository) Migration() {
 }
 
 // NewModel Creates new product model
-func NewModel(productName string, categoryId uint, price float64, stock int, sku string) *Product {
+func NewModel(productName string, categoryName string, price float64, stock int, sku string) *Product {
 
 	return &Product{
-		ProductName: productName,
-		Price:       price,
-		Stock:       stock,
-		CategoryId:  categoryId,
-		SKU:         sku,
+		ProductName:  productName,
+		Price:        price,
+		Stock:        stock,
+		CategoryName: categoryName,
+		SKU:          sku,
 	}
 }
 
@@ -60,13 +58,12 @@ func FindAll() []Product {
 }
 
 // IsProductExist checks if product is already exist
-func IsProductExist(productName string) bool {
+func IsProductExist(productName string, sku string) bool {
 	allProducts := FindAll()
 
 	if len(allProducts) != 0 {
 		var product Product
-		productRepo.db.Where("product_name = ?", productName).Find(&product)
-		fmt.Println(product)
+		productRepo.db.Where("product_name = ? OR sku = ?", productName, sku).Find(&product)
 		if product.ID != 0 {
 			return true
 		}
@@ -83,11 +80,11 @@ func SearchProduct(queryString string) []Product {
 }
 
 // SearchById searches products by product id and returns Product
-func SearchById(id uint) Product {
+func SearchById(id uint) *Product {
 	var product Product
 	productRepo.db.Where("id = ?", id).Find(&product)
 
-	return product
+	return &product
 }
 
 // UpdateStock updates product stock
@@ -115,8 +112,8 @@ func UpdateSKU(p Product, newSKU string) {
 }
 
 // UpdateCategory updates product category id
-func UpdateCategory(p Product, newCategoryId uint) {
-	p.CategoryId = newCategoryId
+func UpdateCategory(p Product, newCategoryName string) {
+	p.CategoryName = newCategoryName
 	productRepo.db.Save(&p)
 }
 

@@ -7,10 +7,10 @@ import (
 
 type Product struct {
 	gorm.Model
-	ProductName string            `json:"product_name"`
-	Price       float64           `json:"price"`
-	Stock       int               `json:"stock"`
-	CategoryId  uint              `json:"category_id"`
-	SKU         string            `json:"sku"`
-	Category    category.Category `gorm:"foreignkey:CategoryId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ProductName  string            `json:"product_name" validate:"required"`
+	Price        float64           `json:"price" validate:"required, number"`
+	Stock        int               `json:"stock" validate:"required, number"`
+	CategoryName string            `json:"category_id" validate:"required"`
+	SKU          string            `json:"sku" validate:"required"`
+	Category     category.Category `gorm:"references:CategoryName; constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

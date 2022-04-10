@@ -33,11 +33,10 @@ func (r *Repository) Migration() {
 }
 
 // NewModel Creates new user model
-func NewModel(email string, password string, role string) *User {
+func NewModel(email string, password string) *User {
 	return &User{
 		Email:    email,
 		Password: password,
-		Role:     role,
 	}
 }
 
@@ -64,4 +63,11 @@ func IsUserExist(email string) bool {
 	}
 
 	return true
+}
+
+func SearchByEmail(email string) User {
+	var model User
+	repository.db.Where("email = ?", email).Find(&model)
+
+	return model
 }

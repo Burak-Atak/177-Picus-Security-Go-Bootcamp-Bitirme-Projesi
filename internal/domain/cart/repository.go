@@ -17,7 +17,7 @@ func init() {
 	cartRepo.Migration()
 }
 
-// NewRepository Creates cart repository
+// NewCartDetailsRepository Creates cart repository
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
 		db: db,
@@ -26,10 +26,13 @@ func NewRepository(db *gorm.DB) *Repository {
 
 // Migration Migrates cart table
 func (r *Repository) Migration() {
-	r.db.AutoMigrate(&Cart{})
+	err := r.db.AutoMigrate(&Cart{})
+	if err != nil {
+		return
+	}
 }
 
-// NewModel Creates new cart model
+// NewCartDetailsModel Creates new cart model
 func NewModel(userId uint) *Cart {
 
 	return &Cart{
@@ -37,17 +40,17 @@ func NewModel(userId uint) *Cart {
 	}
 }
 
-// Create creates new cart model in database
+// CreateCartDetails creates new cart model in database
 func Create(cart *Cart) {
 	cartRepo.db.Create(cart)
 }
 
 // SearchById searches cart by id
-func SearchById(id uint) Cart {
+func SearchById(id uint) *Cart {
 	var cart Cart
 	cartRepo.db.Where("id = ?", id).First(&cart)
 
-	return cart
+	return &cart
 }
 
 // IsCartExist checks if cart exists
@@ -60,4 +63,15 @@ func IsCartExist(userId uint) bool {
 	}
 
 	return true
+}
+
+func Update(cart *Cart) {
+	cartRepo.db.Save(cart)
+}
+
+func UpdateUserCart(userId uint, newAmount int, newPrice float64) {
+	usersCart := SearchById(userId)
+	usersCart.Amount += newAmount
+	usersCart.TotalPrice += newPrice
+	Update(usersCart)
 }

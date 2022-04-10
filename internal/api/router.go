@@ -9,6 +9,7 @@ import (
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/order"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/product"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/user"
+	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/pkg/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,26 +31,25 @@ func RegisterHandlers(r *gin.Engine) {
 	userGroup := r.Group("/user")
 	userGroup.POST("/register", userController.CreateUser)
 	userGroup.POST("/login", userController.Login)
-	userGroup.POST("/logout", userController.Logout)
 
 	cartGroup := r.Group("/cart")
-	cartGroup.GET("/cart/list", cartController.GetCartList)
-	cartGroup.DELETE("/cart/delete", cartController.DeleteItemFromCart)
-	cartGroup.PUT("/cart/update", cartController.UpdateItemInCart)
-	cartGroup.POST("/cart/add", cartController.AddItemToCart)
+	cartGroup.GET("/list", middleware.AuthForGeneral(), cartController.GetCartList)
+	cartGroup.DELETE("/delete", middleware.AuthForGeneral(), cartController.DeleteProductFromCart)
+	cartGroup.PUT("/update", middleware.AuthForGeneral(), cartController.UpdateProductInCart)
+	cartGroup.POST("/add", middleware.AuthForGeneral(), cartController.AddProductToCart)
 
 	orderGroup := r.Group("/order")
-	orderGroup.GET("/order/list", orderController.GetOrderList)
-	orderGroup.POST("/order/create", orderController.CreateOrder)
-	orderGroup.GET("/order/detail", orderController.GetOrderDetail)
-	orderGroup.DELETE("/order/cancel", orderController.CancelOrder)
+	orderGroup.GET("/list", middleware.AuthForGeneral(), orderController.GetOrderList)
+	orderGroup.POST("/create", middleware.AuthForGeneral(), orderController.CreateOrder)
+	orderGroup.GET("/detail", middleware.AuthForGeneral(), orderController.GetOrderDetail)
+	orderGroup.DELETE("/cancel", middleware.AuthForGeneral(), orderController.CancelOrder)
 
 	productGroup := r.Group("/product")
 	productGroup.GET("/list", productController.GetProductList)
 	productGroup.GET("/detail", productController.GetProductDetail)
 	productGroup.GET("/search", productController.SearchProduct)
-	productGroup.POST("/create", productController.CreateProduct)
-	productGroup.PUT("/update", productController.UpdateProduct)
-	productGroup.DELETE("/delete", productController.DeleteProduct)
+	productGroup.POST("/create", middleware.AuthForAdmin(), productController.CreateProduct)
+	productGroup.PUT("/update", middleware.AuthForAdmin(), productController.UpdateProduct)
+	productGroup.DELETE("/delete", middleware.AuthForAdmin(), productController.DeleteProduct)
 
 }
