@@ -1,7 +1,6 @@
 package product
 
 import (
-	"fmt"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/helpers"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/cart"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/category"
@@ -31,8 +30,6 @@ func (c Controller) GetProductList(context *gin.Context) {
 		context.Abort()
 		return
 	}
-
-	fmt.Println(products)
 	outOut := make([]Product, len(products))
 	for i, p := range products {
 		outOut[i] = Product{
