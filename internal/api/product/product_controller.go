@@ -239,7 +239,7 @@ func (c Controller) DeleteProduct(context *gin.Context) {
 	cartService := cart.NewService()
 	if !isOk {
 		context.JSON(http.StatusOK, gin.H{
-			"message": "productId param is required",
+			"message": helpers.InvalidIdError.Error(),
 		})
 		context.Abort()
 		return
