@@ -34,8 +34,14 @@ func (s *Service) CreateProduct(productName string, sku string) error {
 }
 
 // GetProductList returns a list of products if there are any in the database otherwise returns error
-func (s *Service) GetProductList() ([]Product, error) {
-	products := FindAll()
+func (s *Service) GetProductList(pageIndex int, pageSize int) ([]Product, int) {
+	products, allProducts := GetAll(pageIndex, pageSize)
+	return products, allProducts
+}
+
+// SearchProduct checks if product is exist in database by product name and sku
+func (s *Service) SearchProduct(searchQuery string) ([]Product, error) {
+	products := SearchProduct(searchQuery)
 
 	if len(products) == 0 {
 		return nil, helpers.ProductNotFoundError
@@ -44,13 +50,7 @@ func (s *Service) GetProductList() ([]Product, error) {
 	return products, nil
 }
 
-// SearchProduct checks if product is exist in database by product name and sku
-func (s *Service) SearchProduct(search string) ([]Product, error) {
-	products := SearchProduct(search)
-
-	if len(products) == 0 {
-		return nil, helpers.ProductNotFoundError
-	}
-
-	return products, nil
+func (s *Service) SearchProductWithPagination(searchQuery string, pageIndex int, pageSize int) []Product {
+	products := SearchProductWithPagination(searchQuery, pageIndex, pageSize)
+	return products
 }

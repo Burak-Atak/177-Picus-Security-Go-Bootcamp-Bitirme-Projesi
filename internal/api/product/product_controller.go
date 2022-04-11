@@ -5,6 +5,7 @@ import (
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/cart"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/category"
 	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/internal/domain/product"
+	"github.com/Burak-Atak/177-Picus-Security-Go-Bootcamp-Bitirme-Projesi/pkg/pagination"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -20,46 +21,33 @@ func NewProductController(productService *product.Service) *Controller {
 	}
 }
 
-// GetProductList returns a list of products
-func (c Controller) GetProductList(context *gin.Context) {
-	products, err := c.ProductService.GetProductList()
-	if err != nil {
-		context.JSON(http.StatusOK, gin.H{
-			"message": err.Error(),
-		})
-		context.Abort()
-		return
-	}
-	outOut := make([]Product, len(products))
-	for i, p := range products {
-		outOut[i] = Product{
-			ProductName:  p.ProductName,
-			Price:        p.Price,
-			Stock:        p.Stock,
-			ProductId:    p.ID,
-			CategoryName: p.CategoryName,
-		}
-	}
-
-	context.JSON(http.StatusOK, gin.H{
-		"products": outOut,
-	})
-}
-
 // SearchProduct returns a list of products by given search query
 func (c Controller) SearchProduct(context *gin.Context) {
 	search, isOk := context.GetQuery("search")
 	if !isOk {
 		context.JSON(http.StatusOK, gin.H{
-			"message": "search param is required",
+			"message": helpers.SearchParamRequireError.Error(),
 		})
 		context.Abort()
 		return
 	}
-	products, err := c.ProductService.SearchProduct(search)
+
+	allProducts, err := c.ProductService.SearchProduct(search)
 	if err != nil {
 		context.JSON(http.StatusOK, gin.H{
 			"message": err.Error(),
+		})
+		context.Abort()
+		return
+	}
+
+	pageIndex, pageSize := pagination.GetPaginationParametersFromRequest(context)
+	products := c.ProductService.SearchProductWithPagination(search, pageIndex, pageSize)
+	paginatedResult := pagination.NewFromGinRequest(context, len(allProducts))
+
+	if len(products) == 0 {
+		context.JSON(http.StatusNotFound, gin.H{
+			"message": helpers.PageCouldNotBeFoundError.Error(),
 		})
 		context.Abort()
 		return
@@ -76,6 +64,7 @@ func (c Controller) SearchProduct(context *gin.Context) {
 		}
 	}
 	context.JSON(http.StatusOK, gin.H{
+		"Info":     paginatedResult,
 		"products": outOut,
 	})
 }
@@ -113,7 +102,7 @@ func (c Controller) UpdateProduct(context *gin.Context) {
 		stock, err := strconv.Atoi(newStock)
 		if err != nil || stock <= 0 {
 			context.JSON(http.StatusBadRequest, gin.H{
-				"message": helpers.InvalidStock.Error(),
+				"message": helpers.InvalidStockError.Error(),
 			})
 			context.Abort()
 			return
@@ -150,7 +139,7 @@ func (c Controller) UpdateProduct(context *gin.Context) {
 		price, err := strconv.ParseFloat(newPrice, 64)
 		if err != nil || price <= 0 {
 			context.JSON(http.StatusBadRequest, gin.H{
-				"message": helpers.InvalidPrice.Error(),
+				"message": helpers.InvalidPriceError.Error(),
 			})
 			context.Abort()
 			return
@@ -289,5 +278,36 @@ func (c Controller) DeleteProduct(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Product deleted successfully",
+	})
+}
+
+// GetProductList returns a list of products
+func (c Controller) GetProductList(context *gin.Context) {
+	pageIndex, pageSize := pagination.GetPaginationParametersFromRequest(context)
+	products, allProducts := c.ProductService.GetProductList(pageIndex, pageSize)
+	paginatedResult := pagination.NewFromGinRequest(context, allProducts)
+
+	if len(products) == 0 {
+		context.JSON(http.StatusNotFound, gin.H{
+			"message": helpers.PageCouldNotBeFoundError.Error(),
+		})
+		context.Abort()
+		return
+	}
+
+	outOut := make([]Product, len(products))
+	for i, p := range products {
+		outOut[i] = Product{
+			ProductName:  p.ProductName,
+			Price:        p.Price,
+			Stock:        p.Stock,
+			ProductId:    p.ID,
+			CategoryName: p.CategoryName,
+		}
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"Info":     paginatedResult,
+		"Products": outOut,
 	})
 }

@@ -32,7 +32,7 @@ func DecodeBody(body interface{}, context *gin.Context) error {
 			}
 			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": out})
 			context.Abort()
-			return InvalidField
+			return InvalidFieldError
 		}
 		return err
 	}

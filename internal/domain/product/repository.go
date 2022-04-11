@@ -77,10 +77,27 @@ func IsProductExist(productName string, sku string) bool {
 	return false
 }
 
+func GetAll(pageIndex, pageSize int) ([]Product, int) {
+	var products []Product
+
+	allProducts := FindAll()
+	productRepo.db.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&products)
+
+	return products, len(allProducts)
+}
+
 // SearchProduct searches products by product name and sku and returns []Product
 func SearchProduct(queryString string) []Product {
 	var products []Product
 	productRepo.db.Where("LOWER(product_name) LIKE ?", "%"+strings.ToLower(queryString)+"%").Or(productRepo.db.Where("LOWER(sku) LIKE ?", "%"+strings.ToLower(queryString)+"%")).Find(&products)
+
+	return products
+}
+
+// SearchProductWithPagination searches products by product name and sku and returns []Product
+func SearchProductWithPagination(queryString string, pageIndex, pageSize int) []Product {
+	var products []Product
+	productRepo.db.Where("LOWER(product_name) LIKE ?", "%"+strings.ToLower(queryString)+"%").Or(productRepo.db.Where("LOWER(sku) LIKE ?", "%"+strings.ToLower(queryString)+"%")).Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&products)
 
 	return products
 }
